@@ -9,9 +9,11 @@ buildNumber.properties
 .mvn/timing.properties
 
 # Eclipse
-.classpath
-.project
-.settings/
+/.classpath
+/.project
+/.settings/
+/target/
+/bin/
 
 
 /.idea/
