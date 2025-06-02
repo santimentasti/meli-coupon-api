@@ -1,0 +1,61 @@
+# Compilación y salida
+/target/
+/bin/
+/out/
+
+# Archivos de logs
+*.log
+
+# Configuraciones del sistema
+*.iml
+*.iws
+*.ipr
+*.class
+*.swp
+
+# Eclipse
+.settings/
+.project
+.classpath
+
+# IntelliJ
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# NetBeans
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Maven local repository cache si accidentalmente se incluye
+**/repository/
+
+# Archivos generados por herramientas
+.springBeans
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp
+*~
+
+# Archivos de sistema operativo
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# Archivos del entorno de desarrollo
+.vscode/
+
+# Archivos de entorno
+.env
+*.env
