@@ -1,12 +1,13 @@
-# Compilación y salida
-/target/
-/bin/
-/out/
+# Carpetas de build y salida
+target/
+bin/
+out/
 
 # Archivos de logs
 *.log
+logs/
 
-# Configuraciones del sistema
+# Configuraciones del sistema y IDE
 *.iml
 *.iws
 *.ipr
@@ -21,8 +22,11 @@
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
 
-# Maven local repository cache si accidentalmente se incluye
+# Maven local repository cache
 **/repository/
 
 # Archivos generados por herramientas
@@ -34,14 +38,10 @@ Thumbs.db
 *.swp
 *~
 
-# Archivos de sistema operativo
-ehthumbs.db
-Icon?
-Desktop.ini
-
-# Archivos del entorno de desarrollo
+# Archivos entorno de desarrollo
 .vscode/
 
-# Archivos de entorno
+# Variables de entorno
 .env
 *.env
+/target/

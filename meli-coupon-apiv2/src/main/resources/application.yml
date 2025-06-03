@@ -1,0 +1,43 @@
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 400              # Threads para alto throughput
+      min-spare: 20
+    connection-timeout: 5000
+    max-connections: 2000   # Conexiones concurrentes
+  compression:
+    enabled: true
+    mime-types: application/json
+
+spring:
+  application:
+    name: meli-coupon-api
+  webflux:
+    base-path: /coupon
+
+# Profile específico para producción
+---
+spring:
+  config:
+    activate:
+      on-profile: production
+
+logging:
+  level:
+    com.mercadolibre.coupon: WARN    # Solo warnings/errors en prod
+    reactor.netty: WARN
+    io.netty: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Configuración para desarrollo
+---
+spring:
+  config:
+    activate:
+      on-profile: default
+
+logging:
+  level:
+    com.mercadolibre.coupon: INFO
