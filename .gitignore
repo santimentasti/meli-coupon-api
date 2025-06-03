@@ -1,0 +1,47 @@
+# Carpetas de build y salida
+target/
+bin/
+out/
+
+# Archivos de logs
+*.log
+logs/
+
+# Configuraciones del sistema y IDE
+*.iml
+*.iws
+*.ipr
+*.class
+*.swp
+
+# Eclipse
+.settings/
+.project
+.classpath
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# Maven local repository cache
+**/repository/
+
+# Archivos generados por herramientas
+.springBeans
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp
+*~
+
+# Archivos entorno de desarrollo
+.vscode/
+
+# Variables de entorno
+.env
+*.env
+/target/
