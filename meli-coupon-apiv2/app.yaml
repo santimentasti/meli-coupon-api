@@ -1,0 +1,36 @@
+runtime: java17
+service: default
+
+automatic_scaling:
+  min_instances: 3          # Mínimo 3 instancias para alta disponibilidad
+  max_instances: 50         # Escalar hasta 50 instancias para 100K RPM
+  target_cpu_utilization: 0.6
+  target_throughput_utilization: 0.8
+  min_pending_latency: 100ms
+  max_pending_latency: 500ms
+
+resources:
+  cpu: 2                    # 2 vCPUs para mejor throughput
+  memory_gb: 2              # 2GB para cache en memoria y concurrencia
+
+env_variables:
+  SPRING_PROFILES_ACTIVE: production
+  JVM_OPTS: "-Xmx1536m -Xms1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+
+network:
+  forwarded_ports:
+  - 8080
+
+readiness_check:
+  path: "/coupon/health"
+  check_interval_sec: 5
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
+
+liveness_check:
+  path: "/coupon/health"
+  check_interval_sec: 30
+  timeout_sec: 4
+  failure_threshold: 4
+  success_threshold: 2
