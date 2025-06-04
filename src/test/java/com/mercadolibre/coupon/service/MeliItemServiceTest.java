@@ -28,6 +28,7 @@ class MeliItemServiceTest {
 
     private MockWebServer mockWebServer;
     private MeliItemService meliItemService;
+    
 
     @BeforeEach
     void setUp() throws IOException {
@@ -38,8 +39,10 @@ class MeliItemServiceTest {
         String baseUrl = mockWebServer.url("/").toString();
         WebClient.Builder webClientBuilder = WebClient.builder();
         
+        String dummyAccessToken = "TEST_ACCESS_TOKEN_FOR_MOCKING";
+        
         // Crea el servicio usando reflexión para inyectar la URL del servidor simulado
-        meliItemService = new MeliItemService(webClientBuilder) {
+        meliItemService = new MeliItemService(webClientBuilder, dummyAccessToken) {
             {
                 java.lang.reflect.Field webClientField;
                 try {

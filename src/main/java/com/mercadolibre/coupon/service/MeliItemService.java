@@ -26,7 +26,7 @@ public class MeliItemService {
     // Cache crítico para 100K RPM - mismo item favorito de muchos usuarios
     private final Map<String, Item> itemCache = new ConcurrentHashMap<>();
     
-    public MeliItemService(WebClient.Builder webClientBuilder) {
+    public MeliItemService(WebClient.Builder webClientBuilder, @Value("${meli.access-token}") String accessToken) {
         this.webClient = webClientBuilder
                 .baseUrl("https://api.mercadolibre.com")
                 .defaultHeader("Authorization", "Bearer " + accessToken) // token desde env
