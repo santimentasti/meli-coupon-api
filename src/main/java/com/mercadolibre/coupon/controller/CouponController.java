@@ -28,12 +28,11 @@ public class CouponController {
     @PostMapping
     public CompletableFuture<ResponseEntity<CouponResponse>> calculateOptimalItems(
             @Valid @RequestBody CouponRequest request) {
-        
-        return meliItemService.getItemsPrices(request.getItemIds())
+        	return meliItemService.getItemsPrices(request.getItemIds())
                 .thenApply(items -> {
                     List<String> optimalItemIds = optimizationService
                             .findOptimalItems(items, request.getAmount());
-                    
+                    System.out.println("Items recuperados: " + items);
                     BigDecimal total = calculateTotal(items, optimalItemIds);
                     
                     CouponResponse response = new CouponResponse(optimalItemIds, total);

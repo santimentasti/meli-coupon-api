@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Positive;
 
 public class CouponRequest {
     
-    @JsonProperty("item_ids")  // Esta línea mapea el JSON snake_case al Java camelCase
+    @JsonProperty("item_ids")
     @NotEmpty(message = "La lista de Item_id no puede estar vacia")
     private List<String> itemIds;
     

@@ -39,7 +39,7 @@ public class MeliItemService {
                 .uri("/items/{itemId}", itemId)
                 .retrieve()
                 .bodyToMono(MeliItemResponse.class)
-                .timeout(Duration.ofSeconds(3)) // Timeout más agresivo
+                .timeout(Duration.ofSeconds(10)) // Timeout más agresivo
                 .map(response -> {
                     Item item = new Item(response.getId(), response.getPrice());
                     // Cache con TTL implícito por restart de instancia

@@ -114,7 +114,7 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.item_ids").exists())
                 .andExpect(jsonPath("$.item_ids", hasSize(0)))
                 .andExpect(jsonPath("$.total").exists())
-                .andExpect(jsonPath("$.total", is(0.0)));
+                .andExpect(jsonPath("$.total", is(0)));
     }
 
     @Test
@@ -137,7 +137,7 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.item_ids").exists())
                 .andExpect(jsonPath("$.item_ids", hasSize(0)))
                 .andExpect(jsonPath("$.total").exists())
-                .andExpect(jsonPath("$.total", is(0.0)));
+                .andExpect(jsonPath("$.total", is(0)));
     }
 
     @Test
@@ -162,7 +162,7 @@ class CouponControllerTest {
         mockMvc.perform(asyncDispatch(result))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.item_ids", hasSize(0)))
-                .andExpect(jsonPath("$.total", is(0.0)));
+                .andExpect(jsonPath("$.total", is(0)));
     }
 
     @Test
@@ -216,7 +216,7 @@ class CouponControllerTest {
         mockMvc.perform(asyncDispatch(result))
                 .andExpect(status().isOk()) // Cambiar a isBadRequest() cuando la validación funcione
                 .andExpect(jsonPath("$.item_ids", hasSize(0)))
-                .andExpect(jsonPath("$.total", is(0.0)));
+                .andExpect(jsonPath("$.total", is(0)));
     }
 
     @Test
@@ -256,7 +256,7 @@ class CouponControllerTest {
         mockMvc.perform(asyncDispatch(result))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.item_ids", hasSize(0)))
-                .andExpect(jsonPath("$.total", is(0.0)));
+                .andExpect(jsonPath("$.total", is(0)));
     }
 
     @Test
