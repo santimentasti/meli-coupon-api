@@ -18,13 +18,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class MeliItemService {
+	
+	@Value("${meli.access-token}")
+    private String accessToken;
     
     private final WebClient webClient;
     // Cache crítico para 100K RPM - mismo item favorito de muchos usuarios
     private final Map<String, Item> itemCache = new ConcurrentHashMap<>();
-    
-    @Value("${meli.access-token}")
-    private String accessToken;
     
     public MeliItemService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder
