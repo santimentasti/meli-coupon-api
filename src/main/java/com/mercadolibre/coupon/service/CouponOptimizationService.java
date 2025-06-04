@@ -1,8 +1,6 @@
 package com.mercadolibre.coupon.service;
-
 import com.mercadolibre.coupon.model.Item;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -71,6 +69,8 @@ public class CouponOptimizationService {
                 w -= item.price;
             }
         }
+        
+        Collections.sort(selectedItems);
         
         return selectedItems;
     }
