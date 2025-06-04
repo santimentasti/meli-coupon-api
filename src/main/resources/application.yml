@@ -22,6 +22,9 @@ spring:
   config:
     activate:
       on-profile: production
+	  
+meli:
+  access-token: ${MELI_ACCESS_TOKEN}
 
 logging:
   level:

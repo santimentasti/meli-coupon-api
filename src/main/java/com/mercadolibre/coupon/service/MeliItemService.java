@@ -2,6 +2,8 @@ package com.mercadolibre.coupon.service;
 
 import com.mercadolibre.coupon.dto.MeliItemResponse;
 import com.mercadolibre.coupon.model.Item;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -21,10 +23,14 @@ public class MeliItemService {
     // Cache crítico para 100K RPM - mismo item favorito de muchos usuarios
     private final Map<String, Item> itemCache = new ConcurrentHashMap<>();
     
+    @Value("${meli.access-token}")
+    private String accessToken;
+    
     public MeliItemService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder
                 .baseUrl("https://api.mercadolibre.com")
-                // Configuración para alto throughput
+                .defaultHeader("Authorization", "Bearer " + accessToken) // token desde env
+             // Configuración para alto throughput
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }
