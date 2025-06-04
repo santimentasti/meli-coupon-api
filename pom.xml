@@ -99,6 +99,7 @@
 <artifactId>maven-surefire-plugin</artifactId>
 <version>3.0.0-M9</version>
 <configuration>
+<argLine>-Xmx2048m -Xms512m</argLine>
 <parallel>methods</parallel>
 <threadCount>4</threadCount>
 <includes>
