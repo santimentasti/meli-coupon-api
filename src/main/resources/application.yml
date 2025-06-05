@@ -25,6 +25,12 @@ spring:
 
 meli:
   access-token: ${MELI_ACCESS_TOKEN}
+  client-id: 640076329285201
+  client-secret: hKk2MuK89vHyHbU1VwnLZEKQZGl2Szsu
+  redirect-uri: ${URL}/auth/mercadolibre/callback
+  auth-url: https://auth.mercadolibre.com.ar/authorization
+  token-url: https://api.mercadolibre.com/oauth/token
+  api-url: https://api.mercadolibre.com
 
 logging:
   level:
@@ -40,6 +46,16 @@ spring:
   config:
     activate:
       on-profile: default
+
+ 
+meli:
+  access-token: ${MELI_ACCESS_TOKEN}
+  client-id: 640076329285201
+  client-secret: hKk2MuK89vHyHbU1VwnLZEKQZGl2Szsu
+  redirect-uri: ${URL}/auth/mercadolibre/callback
+  auth-url: https://auth.mercadolibre.com.ar/authorization
+  token-url: https://api.mercadolibre.com/oauth/token
+  api-url: https://api.mercadolibre.com
 
 logging:
   level:

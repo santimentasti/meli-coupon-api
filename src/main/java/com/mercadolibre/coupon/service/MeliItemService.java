@@ -1,5 +1,7 @@
 package com.mercadolibre.coupon.service;
 
+import com.mercadolibre.coupon.controller.AuthController;
+import com.mercadolibre.coupon.dto.AccessTokenResponse;
 import com.mercadolibre.coupon.dto.MeliItemResponse;
 import com.mercadolibre.coupon.model.Item;
 
@@ -35,24 +37,46 @@ public class MeliItemService {
                 .build();
     }
     
+ // Método auxiliar para obtener el Access Token
+    private String getAccessToken() {
+        // ¡ADVERTENCIA! Esto es para DEMOSTRACIÓN.
+        // En un entorno de producción, el token se obtendría del contexto de seguridad
+        // del usuario o de una base de datos segura, NO de una variable estática de un controlador.
+        AccessTokenResponse token = AuthController.getCurrentAccessTokenForService();
+        if (token != null) {
+            return token.getAccessToken();
+        }
+        // Manejar el caso donde no hay token, quizás lanzando una excepción o retornando null
+        System.err.println("Advertencia: No se encontró un Access Token. Las solicitudes a Meli pueden fallar.");
+        return null; // O lanzar una RuntimeException
+    }
+    
     public CompletableFuture<Item> getItemPrice(String itemId) {
         // Cache hit crítico para escalar
         if (itemCache.containsKey(itemId)) {
             return CompletableFuture.completedFuture(itemCache.get(itemId));
         }
         
+        String currentAccessToken = getAccessToken(); // Obtener el token dinámicamente
+        if (currentAccessToken == null) {
+            return CompletableFuture.failedFuture(new IllegalStateException("Access Token no disponible."));
+        }
+        
         return webClient.get()
                 .uri("/items/{itemId}", itemId)
+                .header("Authorization", "Bearer " + currentAccessToken) // Añadir el header de autorización
                 .retrieve()
                 .bodyToMono(MeliItemResponse.class)
-                .timeout(Duration.ofSeconds(10)) // Timeout más agresivo
+                .timeout(Duration.ofSeconds(10))
                 .map(response -> {
                     Item item = new Item(response.getId(), response.getPrice());
-                    // Cache con TTL implícito por restart de instancia
                     itemCache.put(itemId, item);
                     return item;
                 })
-                .onErrorReturn(new Item(itemId, BigDecimal.ZERO)) // Fallar silenciosamente
+                .onErrorResume(e -> { // Usar onErrorResume para manejar errores de WebClient
+                    System.err.println("Error fetching item " + itemId + ": " + e.getMessage());
+                    return Mono.just(new Item(itemId, BigDecimal.ZERO)); // Fallar silenciosamente con un item de precio cero
+                })
                 .toFuture();
     }
     
