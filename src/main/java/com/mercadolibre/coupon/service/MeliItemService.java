@@ -5,11 +5,8 @@ import com.mercadolibre.coupon.controller.AuthController;
 import com.mercadolibre.coupon.dto.AccessTokenResponse;
 import com.mercadolibre.coupon.dto.MeliItemResponse;
 import com.mercadolibre.coupon.model.Item;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -24,9 +21,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class MeliItemService {
-	
-	@Value("${meli.access-token}")
-    private String accessToken;
     
     private final WebClient webClient;
     // Cache crítico para 100K RPM - mismo item favorito de muchos usuarios
