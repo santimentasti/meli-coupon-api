@@ -42,7 +42,7 @@ class MeliItemServiceTest {
         String dummyAccessToken = "TEST_ACCESS_TOKEN_FOR_MOCKING";
         
         // Crea el servicio usando reflexión para inyectar la URL del servidor simulado
-        meliItemService = new MeliItemService(webClientBuilder, dummyAccessToken) {
+        meliItemService = new MeliItemService(webClientBuilder) {
             {
                 java.lang.reflect.Field webClientField;
                 try {

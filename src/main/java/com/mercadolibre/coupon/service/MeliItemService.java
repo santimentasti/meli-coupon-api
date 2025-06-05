@@ -28,28 +28,26 @@ public class MeliItemService {
     // Cache crítico para 100K RPM - mismo item favorito de muchos usuarios
     private final Map<String, Item> itemCache = new ConcurrentHashMap<>();
     
-    public MeliItemService(WebClient.Builder webClientBuilder, @Value("${meli.access-token}") String accessToken) {
+    private String getAccessToken() {
+        AccessTokenResponse token = AuthController.getCurrentAccessTokenForService();
+        if (token != null) {
+            return token.getAccessToken();
+        }
+        
+        System.err.println("Advertencia: No se encontró un Access Token. Las solicitudes a Meli fallarán.");
+        return null;
+    }
+    
+    public MeliItemService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder
                 .baseUrl("https://api.mercadolibre.com")
-                .defaultHeader("Authorization", "Bearer " + accessToken) // token desde env
-             // Configuración para alto throughput
+                // NO ponemos Authorization header aquí - se agrega dinámicamente
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }
     
  // Método auxiliar para obtener el Access Token
-    private String getAccessToken() {
-        // ¡ADVERTENCIA! Esto es para DEMOSTRACIÓN.
-        // En un entorno de producción, el token se obtendría del contexto de seguridad
-        // del usuario o de una base de datos segura, NO de una variable estática de un controlador.
-        AccessTokenResponse token = AuthController.getCurrentAccessTokenForService();
-        if (token != null) {
-            return token.getAccessToken();
-        }
-        // Manejar el caso donde no hay token, quizás lanzando una excepción o retornando null
-        System.err.println("Advertencia: No se encontró un Access Token. Las solicitudes a Meli pueden fallar.");
-        return null; // O lanzar una RuntimeException
-    }
+    
     
     public CompletableFuture<Item> getItemPrice(String itemId) {
         // Cache hit crítico para escalar
@@ -64,7 +62,7 @@ public class MeliItemService {
         
         return webClient.get()
                 .uri("/items/{itemId}", itemId)
-                .header("Authorization", "Bearer " + currentAccessToken) // Añadir el header de autorización
+                .header("Authorization", "Bearer " + currentAccessToken)
                 .retrieve()
                 .bodyToMono(MeliItemResponse.class)
                 .timeout(Duration.ofSeconds(10))
@@ -73,9 +71,13 @@ public class MeliItemService {
                     itemCache.put(itemId, item);
                     return item;
                 })
-                .onErrorResume(e -> { // Usar onErrorResume para manejar errores de WebClient
+                .onErrorResume(e -> {
                     System.err.println("Error fetching item " + itemId + ": " + e.getMessage());
-                    return Mono.just(new Item(itemId, BigDecimal.ZERO)); // Fallar silenciosamente con un item de precio cero
+                    // En caso de error 401, el token podría estar expirado
+                    if (e.getMessage().contains("401")) {
+                        System.err.println("Posible token expirado para item: " + itemId);
+                    }
+                    return Mono.just(new Item(itemId, BigDecimal.ZERO));
                 })
                 .toFuture();
     }
