@@ -25,12 +25,6 @@ API REST que simula el funcionamiento de la API de cupones de Mercado Libre. Per
 - Maven
 - Docker (opcional, para ejecución en contenedor)
 
-##IMPORTANTE
-
-DEFINIR EL ACCESS TOKEN:
-Abrir una terminal pegar esto:
-set MELI_ACCESS_TOKEN=tu-access-token
-
 ### Clonar el repositorio
 
 ```bash
