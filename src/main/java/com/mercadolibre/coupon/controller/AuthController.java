@@ -119,8 +119,6 @@ public class AuthController {
     public ResponseEntity<AccessTokenResponse> exchangeCodeForAccessToken(@RequestBody AccessTokenRequest request) {
         try {
             AccessTokenResponse tokenResponse = meliAuthService.exchangeCodeForAccessToken(request.getCode());
-
-            // Guarda el token globalmente para uso en otros servicios (SOLO DEMOSTRACIÓN)
             currentAccessToken = tokenResponse;
 
             System.out.println("------------------------------------");

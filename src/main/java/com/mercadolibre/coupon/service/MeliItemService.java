@@ -1,5 +1,6 @@
 package com.mercadolibre.coupon.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mercadolibre.coupon.controller.AuthController;
 import com.mercadolibre.coupon.dto.AccessTokenResponse;
 import com.mercadolibre.coupon.dto.MeliItemResponse;
@@ -13,6 +14,7 @@ import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,7 +94,7 @@ public class MeliItemService {
      * @param itemIds Lista de IDs de ítems a consultar.
      * @return Un CompletableFuture que contendrá la lista de ítems con sus precios.
      */
-    public CompletableFuture<List<Item>> getItemsPrices(List<String> itemIds) { // Ya no necesita 'accessToken' como parámetro
+    public CompletableFuture<List<Item>> getItemsPrices(List<String> itemIds) {
         if (itemIds == null || itemIds.isEmpty()) {
             return CompletableFuture.completedFuture(List.of());
         }
@@ -120,46 +122,74 @@ public class MeliItemService {
         // 4. Construir la cadena de IDs para la llamada batch
         String itemIdsString = String.join(",", idsToFetch);
 
+        System.out.println("Consultando items a MercadoLibre: " + itemIdsString);
+
         // 5. Realizar la llamada batch a la API de Mercado Libre
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                    .path("/items") // El path base es /items
-                    .queryParam("ids", itemIdsString) // El query param es 'ids'
+                    .path("/items")
+                    .queryParam("ids", itemIdsString)
                     .build())
-                .header("Authorization", "Bearer " + currentAccessToken) // Añadir el header de autorización
+                .header("Authorization", "Bearer " + currentAccessToken)
                 .retrieve()
-                .bodyToFlux(MeliItemResponse.class) // Esperamos un Flux (lista) de MeliItemResponse
-                .timeout(Duration.ofSeconds(15)) // Un timeout un poco más generoso para llamadas batch
-                .collectList() // Recopilar todos los elementos en una lista
-                .map(meliResponses -> {
-                    List<Item> fetchedItems = meliResponses.stream()
-                        // Filtramos las respuestas que no tienen ID o precio válido
-                        .filter(response -> response != null && response.getId() != null && response.getPrice() != null && response.getPrice().compareTo(BigDecimal.ZERO) > 0)
-                        .map(response -> new Item(response.getId(), response.getPrice()))
-                        .collect(Collectors.toList());
+                .bodyToMono(JsonNode.class) // Recibimos como JsonNode para manejar la estructura compleja
+                .timeout(Duration.ofSeconds(15))
+                .map(jsonResponse -> {
+                    List<Item> fetchedItems = new ArrayList<>();
+                    
+                    // La API de MercadoLibre devuelve un array de objetos
+                    if (jsonResponse.isArray()) {
+                        for (JsonNode itemNode : jsonResponse) {
+                            try {
+                                // Cada elemento tiene una estructura: {"code": 200, "body": {...}}
+                                if (itemNode.has("code") && itemNode.get("code").asInt() == 200 && itemNode.has("body")) {
+                                    JsonNode bodyNode = itemNode.get("body");
+                                    String id = bodyNode.get("id").asText();
+                                    BigDecimal price = new BigDecimal(bodyNode.get("price").asText());
+                                    
+                                    if (price.compareTo(BigDecimal.ZERO) > 0) {
+                                        Item item = new Item(id, price);
+                                        fetchedItems.add(item);
+                                        itemCache.put(id, item);
+                                        System.out.println("Item obtenido: " + id + " - Precio: " + price);
+                                    }
+                                } else {
+                                    // Item no encontrado o error
+                                    System.err.println("Item no encontrado o con error en respuesta batch");
+                                }
+                            } catch (Exception e) {
+                                System.err.println("Error procesando item en batch: " + e.getMessage());
+                            }
+                        }
+                    }
 
-                    // Actualizar el caché con los ítems recién obtenidos
-                    fetchedItems.forEach(item -> itemCache.put(item.getId(), item));
-
-                    // 6. Combinar los ítems de la caché con los ítems recién obtenidos
-                    // Aseguramos que la lista final tenga los IDs originales y sus precios (0 si no se encontraron)
+                    // 6. Combinar resultados: items del cache + items recién obtenidos
                     return itemIds.stream().map(id -> {
-                                      Item item = itemCache.get(id);
-                                      // Si un item solicitado no se encontró en la API (y por ende no en caché), lo consideramos como precio 0
-                                      if (item == null) {
-                                          System.err.println("Advertencia: Item " + id + " no encontrado en la respuesta de Mercado Libre o tenía precio inválido.");
-                                          return new Item(id, BigDecimal.ZERO);
-                                      }
-                                      return item;
-                                  })
-                                  .collect(Collectors.toList());
-                }).onErrorResume(e -> { // Manejo de errores para la llamada batch completa
-                    System.err.println("Error fetching batch items: " + e.getMessage());
-                    // En caso de error general de la llamada batch, devolvemos una lista de items con precio cero
+                        Item item = itemCache.get(id);
+                        if (item == null) {
+                            System.err.println("Advertencia: Item " + id + " no encontrado, usando precio 0");
+                            return new Item(id, BigDecimal.ZERO);
+                        }
+                        return item;
+                    }).collect(Collectors.toList());
+                    
+                }).onErrorResume(e -> {
+                    System.err.println("Error en llamada batch a MercadoLibre: " + e.getMessage());
+                    e.printStackTrace();
+                    
+                    // En caso de error, devolver items con precio 0
                     return Mono.just(itemIds.stream()
                                             .map(id -> new Item(id, BigDecimal.ZERO))
                                             .collect(Collectors.toList()));
                 })
                 .toFuture();
+    }
+    
+    /**
+     * Método para verificar si hay un token válido disponible
+     */
+    public boolean hasValidToken() {
+        String token = getAccessToken();
+        return token != null && !token.isEmpty();
     }
 }
