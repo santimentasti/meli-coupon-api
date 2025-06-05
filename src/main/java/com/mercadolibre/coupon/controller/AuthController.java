@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/mercadolibre/auth")
+@RequestMapping("/coupon/api/mercadolibre/auth")
 public class AuthController {
 
     private final MeliAuthService meliAuthService; 
