@@ -6,6 +6,7 @@ import com.mercadolibre.coupon.model.Item;
 import com.mercadolibre.coupon.service.CouponOptimizationService;
 import com.mercadolibre.coupon.service.MeliItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,19 +29,32 @@ public class CouponController {
     @PostMapping
     public CompletableFuture<ResponseEntity<CouponResponse>> calculateOptimalItems(
             @Valid @RequestBody CouponRequest request) {
-        	return meliItemService.getItemsPrices(request.getItemIds())
+        
+        String accessToken = AuthController.getCurrentAccessTokenForService() != null ?
+                             AuthController.getCurrentAccessTokenForService().getAccessToken() : null;
+
+        if (accessToken == null || accessToken.isEmpty()) {
+            System.err.println("Error: Access Token no disponible para la solicitud de cupón. Por favor, realiza el flujo de OAuth.");
+            return CompletableFuture.completedFuture(
+                ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new CouponResponse(List.of(), BigDecimal.ZERO))
+            );
+        }
+
+        // Llamamos a MeliItemService.getItemsPrices sin pasar el accessToken,
+        // ya que MeliItemService ahora lo obtiene internamente.
+        return meliItemService.getItemsPrices(request.getItemIds())
                 .thenApply(items -> {
                     List<String> optimalItemIds = optimizationService
                             .findOptimalItems(items, request.getAmount());
-                    System.out.println("Items recuperados: " + items);
+                    System.out.println("Items recuperados para optimización: " + items);
                     BigDecimal total = calculateTotal(items, optimalItemIds);
                     
                     CouponResponse response = new CouponResponse(optimalItemIds, total);
                     return ResponseEntity.ok(response);
                 })
                 .exceptionally(throwable -> {
-                    // Log error produccion
-                    System.err.println("Error coupon request: " + throwable.getMessage());
+                    System.err.println("Error en calculateOptimalItems: " + throwable.getMessage());
                     return ResponseEntity.internalServerError()
                             .body(new CouponResponse(List.of(), BigDecimal.ZERO));
                 });
