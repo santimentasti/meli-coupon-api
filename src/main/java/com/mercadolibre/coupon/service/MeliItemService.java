@@ -39,7 +39,7 @@ public class MeliItemService {
     public MeliItemService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder
                 .baseUrl("https://api.mercadolibre.com")
-                // NO ponemos Authorization header aquí - se agrega dinámicamente
+                // NO se agrega Authorization header aquí - se agrega dinámicamente
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
     }
