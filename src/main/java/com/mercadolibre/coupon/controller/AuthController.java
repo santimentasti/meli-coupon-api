@@ -31,18 +31,6 @@ public class AuthController {
         return ResponseEntity.ok(Collections.singletonMap("authorizationUrl", authorizationUrl));
     }
     
-    /**
-     * Callback endpoint para manejar la redirección de MercadoLibre después de la autorización.
-     * MercadoLibre redirige aquí con el código de autorización o error.
-     * 
-     * URL de Callback: GET http://localhost:8080/api/mercadolibre/auth/callback
-     * 
-     * @param code Código de autorización enviado por MercadoLibre (si la autorización fue exitosa)
-     * @param error Código de error enviado por MercadoLibre (si hubo un error)
-     * @param errorDescription Descripción del error (opcional)
-     * @param state Parámetro de estado para prevenir ataques CSRF (opcional)
-     * @return ResponseEntity con el resultado del proceso de autorización
-     */
     @GetMapping("/callback")
     public ResponseEntity<Map<String, Object>> handleCallback(
             @RequestParam(value = "code", required = false) String code,
@@ -163,13 +151,6 @@ public class AuthController {
         }
     }
 
-    /**
-     * Endpoint para consultar el token actual (SOLO PARA DESARROLLO/DEPURACIÓN).
-     * No debe usarse en producción sin autenticación y autorización adecuadas.
-     *
-     * URL de Acceso: GET http://localhost:8080/api/mercadolibre/auth/current-token
-     * @return El token de acceso actual almacenado (si existe).
-     */
     @GetMapping("/current-token")
     public ResponseEntity<AccessTokenResponse> getCurrentToken() {
         if (currentAccessToken != null) {
